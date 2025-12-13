@@ -26,22 +26,35 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Pelajar routes
 Route::prefix('pelajar')->middleware(['auth', 'pelajar'])->group(function () {
+    // Dashboard & Profil
     Route::get('/dashboard', [PelajarController::class, 'index'])->name('pelajar.dashboard');
     Route::get('/profile', [PelajarController::class, 'showProfile'])->name('pelajar.profile');
-
     Route::get('/profile/edit', [PelajarController::class, 'editProfile'])->name('pelajar.profile.edit');
     Route::post('/profile', [PelajarController::class, 'updateProfile'])->name('pelajar.profile.update');
 
+    // Pencarian dan Rekomendasi
     Route::get('/search', [PelajarController::class, 'searchForm'])->name('pelajar.search.form');
-    Route::post('/search/src', [PelajarController::class, 'search'])->name('pelajar.search.results');
+    // Proses pencarian dan menampilkan hasil
+    Route::post('/search/results', [PelajarController::class, 'search'])->name('pelajar.search.results');
 
-    Route::post('/search', [PelajarController::class, 'handleSearch'])->name('pelajar.search.handle');
-    Route::post('/requests/{id}/create', [PelajarController::class, 'createRequest'])->name('pelajar.requests.create');
-    Route::get('/requests', [PelajarController::class, 'viewRequests'])->name('pelajar.requests');
-    Route::get('/recommendations', [PelajarController::class, 'viewRecommendations'])->name('pelajar.recommendations');
-    Route::get('/reviews', [PelajarController::class, 'viewReviews'])->name('pelajar.reviews');
-    Route::get('/reviews/{pengajarId}/create', [PelajarController::class, 'showReviewForm'])->name('pelajar.reviews.create');
-    Route::post('/reviews/{pengajarId}/create', [PelajarController::class, 'submitReview'])->name('pelajar.reviews.submit');
+    // Detail Pengajar (Pengajar Show)
+    Route::get('/pengajar/{id}', [PelajarController::class, 'showPengajar'])->name('pelajar.pengajar.show');
+
+    // Aksi Permintaan Privat (KOREKSI USE CASE)
+    // Rute untuk mengirim permintaan privat
+    Route::post('/requests/{pengajarId}/create', [PelajarController::class, 'requestPengajar'])->name('pelajar.pengajar.request');
+
+    // Rute untuk menampilkan riwayat permintaan (Permintaan Index)
+    Route::get('/requests/history', [PelajarController::class, 'permintaanIndex'])->name('pelajar.permintaan.index');
+    // Rute untuk membatalkan permintaan
+    Route::post('/requests/{id}/cancel', [PelajarController::class, 'cancelPermintaan'])->name('pelajar.permintaan.cancel');
+
+    // Rute Ulasan
+    Route::get('/reviews/{pengajarId}/create', [PelajarController::class, 'showReviewForm'])->name('pelajar.pengajar.review.form');
+    Route::post('/reviews/{pengajarId}', [PelajarController::class, 'storeReview'])->name('pelajar.pengajar.review.store');
+
+    // History Rekomendasi (Jika ingin ditampilkan)
+    Route::get('/recommendations/history', [PelajarController::class, 'recommendationsHistory'])->name('pelajar.recommendations.history');
 });
 
 

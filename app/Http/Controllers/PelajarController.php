@@ -113,21 +113,27 @@ class PelajarController extends \App\Http\Controllers\Controller
         $pengajar = Pengajar::findOrFail($pengajarId);
 
         $data = $request->validate([
+            // Tambahkan validasi yang lebih ketat sesuai form modal
             'jadwal_diinginkan' => 'required|date|after:now',
             'keterangan' => 'nullable|string|max:1500',
-            'contact' => 'nullable|string|max:100',
+            // 'contact' yang lama dihapus/diasumsikan diambil dari profil User
         ]);
+
+        // Mengambil mata pelajaran dari profil Pengajar untuk disimpan di Permintaan
+        $mataPelajaran = $pengajar->mata_pelajaran;
 
         $perm = Permintaan::create([
             'user_id' => Auth::id(),
             'pengajar_id' => $pengajar->id,
+            'mata_pelajaran' => $mataPelajaran, // Field mata_pelajaran perlu diisi
             'jadwal_diinginkan' => $data['jadwal_diinginkan'],
             'keterangan' => $data['keterangan'] ?? null,
             'status' => 'pending'
         ]);
 
         // (optional) TODO: kirim notifikasi ke pengajar (email / in-app)
-        return redirect()->route('pelajar.dashboard')->with('success', 'Permintaan berhasil dikirim. Tunggu konfirmasi pengajar.');
+        // Arahkan ke riwayat permintaan, bukan dashboard
+        return redirect()->route('pelajar.permintaan.index')->with('success', 'Permintaan berhasil dikirim kepada '.$pengajar->user->name.'. Tunggu konfirmasi pengajar.');
     }
 
     /**

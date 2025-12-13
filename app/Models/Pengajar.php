@@ -30,8 +30,9 @@ class Pengajar extends Model
         'status_verifikasi' => 'boolean',
     ];
 
-    // Append supaya attribute accessor muncul di JSON / toArray()
-    protected $appends = ['average_rating','total_ulasan'];
+    // KRITIS: Tambahkan 'latitude' dan 'longitude' agar muncul saat model di-load
+    // dan agar bisa dipanggil dengan $pengajar->latitude (memanggil Accessor di bawah)
+    protected $appends = ['average_rating','total_ulasan', 'latitude', 'longitude'];
 
     // Relationships
     public function user()
@@ -65,6 +66,20 @@ class Pengajar extends Model
     public function getTotalUlasanAttribute()
     {
         return (int) $this->ulasan()->count();
+    }
+
+    // ACCESSOR KRITIS 1: Mengambil Latitude dari relasi User
+    public function getLatitudeAttribute()
+    {
+        // Menggunakan optional() untuk keamanan jika relasi user belum dimuat
+        return optional($this->user)->latitude;
+    }
+
+    // ACCESSOR KRITIS 2: Mengambil Longitude dari relasi User
+    public function getLongitudeAttribute()
+    {
+        // Mengambil data lokasi dari tabel users melalui relasi
+        return optional($this->user)->longitude;
     }
 
     // Scopes

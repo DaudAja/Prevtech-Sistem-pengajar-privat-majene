@@ -17,8 +17,6 @@ return new class extends Migration
             $table->string('mata_pelajaran');
             $table->string('pendidikan_terakhir');
             $table->integer('pengalaman_tahun')->default(0);
-            $table->decimal('latitude', 10, 7)->nullable();
-            $table->decimal('longitude', 10, 7)->nullable();
             $table->text('deskripsi')->nullable();
             $table->decimal('tarif_per_jam', 10, 2)->nullable();
             $table->boolean('status_verifikasi')->default(false);
