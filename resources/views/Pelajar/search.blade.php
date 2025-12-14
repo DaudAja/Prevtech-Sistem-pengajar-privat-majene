@@ -33,10 +33,10 @@
                             <input name="mata_pelajaran" class="form-control" placeholder="Contoh: Matematika">
                         </div>
 
-                        <div class="col-md-6 form-group">
+                        {{-- <div class="col-md-6 form-group">
                             <label class="form-label">Pengalaman  (Tahun)</label>
                             <input name="pengalaman_tahun" class="form-control" placeholder="Contoh: 10">
-                        </div>
+                        </div> --}}
 
                         <div class="col-md-6 form-group">
                             <label class="form-label">Jarak Maksimal (Km)</label>
