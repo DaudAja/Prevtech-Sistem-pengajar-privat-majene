@@ -1,27 +1,84 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto p-4">
-    <h1 class="text-xl font-bold mb-4">Profil Saya</h1>
 
-    <div class="bg-white p-4 rounded shadow">
-        <div class="flex items-center gap-4">
-            <div class="w-24 h-24 bg-gray-100 rounded overflow-hidden">
-                @if($user->foto_profil)
-                    <img src="{{ asset('storage/'.$user->foto_profil) }}" alt="foto" class="w-full h-full object-cover">
-                @endif
+{{-- 1. Content Header AdminLTE --}}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                <h1 class="m-0 text-dark"><i class="fas fa-user"></i> Profil Saya</h1>
             </div>
-            <div>
-                <div class="text-lg font-semibold">{{ $user->name }}</div>
-                <div class="text-sm text-gray-600">{{ $user->email }}</div>
-                <div class="text-sm text-gray-600">No: {{ $user->no_telepon ?? '-' }}</div>
-                <div class="text-sm text-gray-600">Koordinat: {{ $user->latitude ?? '-' }}, {{ $user->longitude ?? '-' }}</div>
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <a href="{{ route('pelajar.profile.edit') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Edit Profil</a>
         </div>
     </div>
 </div>
+
+{{-- 2. Main Content Section --}}
+<section class="content">
+    <div class="container-fluid">
+
+        {{-- Flash Messages (Jika ada) --}}
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        {{-- Kartu Utama Detail Profil --}}
+        <div class="card card-info card-outline">
+            <div class="card-header">
+                <h3 class="card-title">Informasi Akun</h3>
+            </div>
+
+            {{-- <div class="card-body">
+                <div class="row"> --}}
+                    {{-- Foto Profil --}}
+                    {{-- <div class="col-md-3 text-center mb-3">
+                        <div class="bg-gray-100 rounded overflow-hidden" style="width: 120px; height: 120px; margin: 0 auto;">
+                            @if($user->foto_profil)
+                                <img src="{{ asset('storage/'.$user->foto_profil) }}"
+                                     alt="Foto Profil"
+                                     class="img-fluid img-circle elevation-2"
+                                     style="object-fit: cover; width: 100%; height: 100%;">
+                            @else
+                                <img src="{{ asset('img/default-user.png') }}"
+                                     alt="Default Foto"
+                                     class="img-fluid img-circle elevation-2"
+                                     style="object-fit: cover; width: 100%; height: 100%;">
+                            @endif
+                        </div>
+                    </div> --}}
+
+                    {{-- Detail Teks --}}
+                    <div class="col-md-9">
+                        <h2 class="text-xl font-weight-bold text-primary">{{ $user->name }}</h2>
+
+                        <dl class="row mt-3">
+                            <dt class="col-sm-3 text-sm">Email</dt>
+                            <dd class="col-sm-9 text-sm text-dark">{{ $user->email }}</dd>
+
+                            <dt class="col-sm-3 text-sm">No Telepon</dt>
+                            <dd class="col-sm-9 text-sm text-dark">{{ $user->no_telepon ?? '-' }}</dd>
+
+                            <dt class="col-sm-3 text-sm">Lokasi (Koordinat)</dt>
+                            <dd class="col-sm-9 text-sm text-dark">
+                                {{ $user->latitude ?? '-' }}, {{ $user->longitude ?? '-' }}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div> {{-- /.card-body --}}
+
+            <div class="card-footer">
+                <a href="{{ route('pelajar.profile.edit') }}" class="btn btn-primary">
+                    <i class="fas fa-user-edit"></i> Edit Profil
+                </a>
+            </div> {{-- /.card-footer --}}
+        </div> {{-- /.card --}}
+
+    </div> {{-- /.container-fluid --}}
+</section>
 @endsection

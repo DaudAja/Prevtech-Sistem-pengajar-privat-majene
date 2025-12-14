@@ -53,6 +53,7 @@ class PelajarController extends \App\Http\Controllers\Controller
      */
     public function searchForm()
     {
+
         return view('pelajar.search');
     }
 
@@ -61,6 +62,25 @@ class PelajarController extends \App\Http\Controllers\Controller
      */
     public function search(Request $request)
     {
+        // --- 1. HANDLE REQUEST GET (DARI TOMBOL 'KEMBALI') ---
+        if ($request->isMethod('get')) {
+            // Ambil hasil dan kriteria dari sesi
+            $results = session('last_search_results');
+            $criteria = session('last_search_criteria');
+
+            if (!$criteria || !$results) {
+                // Jika tidak ada data sesi, arahkan pengguna kembali ke formulir pencarian
+                return redirect()->route('pelajar.search.form')->withErrors([
+                    'Silakan lakukan pencarian terlebih dahulu untuk melihat hasilnya.'
+                ]);
+            }
+
+            // Tampilkan hasil yang disimpan di sesi
+            return view('pelajar.search_results', compact('results', 'criteria'));
+        }
+
+        // --- 2. HANDLE REQUEST POST (PENCARIAN BARU) ---
+        // Logika validasi dan pemrosesan yang Anda berikan:
         $data = $request->validate([
             'mata_pelajaran' => 'nullable|string|max:191',
             'latitude' => 'required|numeric',
@@ -76,10 +96,10 @@ class PelajarController extends \App\Http\Controllers\Controller
 
         $k = $data['k'] ?? 5;
 
-        // panggil service KNN (harus dibuat di app/Services/KnnService.php seperti sebelumnya)
+        // Panggil service KNN
         $results = KnnService::recommend($criteria, $k); // hasil: array of ['pengajar','distance','score']
 
-        // simpan history rekomendasi (opsional)
+        // Simpan history rekomendasi (opsional)
         foreach ($results as $r) {
             Rekomendasi::create([
                 'user_id' => Auth::id(),
@@ -89,6 +109,11 @@ class PelajarController extends \App\Http\Controllers\Controller
                 'tanggal_rekomendasi' => now(),
             ]);
         }
+
+        // --- SIMPAN HASIL DAN KRITERIA KE SESSION SEBELUM RETURN VIEW ---
+        // Ini penting agar tombol 'Kembali' (GET) bisa mengambil data ini
+        session(['last_search_results' => $results]);
+        session(['last_search_criteria' => $criteria]);
 
         return view('pelajar.search_results', [
             'results' => $results,
@@ -133,7 +158,7 @@ class PelajarController extends \App\Http\Controllers\Controller
 
         // (optional) TODO: kirim notifikasi ke pengajar (email / in-app)
         // Arahkan ke riwayat permintaan, bukan dashboard
-        return redirect()->route('pelajar.permintaan.index')->with('success', 'Permintaan berhasil dikirim kepada '.$pengajar->user->name.'. Tunggu konfirmasi pengajar.');
+        return redirect()->route('pelajar.permintaan.index')->with('success', 'Permintaan berhasil dikirim kepada ' . $pengajar->user->name . '. Tunggu konfirmasi pengajar.');
     }
 
     /**

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('mata_pelajaran');
             $table->text('deskripsi')->nullable();
             $table->timestamp('jadwal_diinginkan')->nullable();
-            $table->enum('status', ['pending', 'diterima', 'ditolak'])->default('pending');
+            $table->enum('status', ['pending', 'diterima', 'ditolak', 'cancelled'])->default('pending');
             $table->text('catatan_pengajar')->nullable();
             $table->timestamps();
         });

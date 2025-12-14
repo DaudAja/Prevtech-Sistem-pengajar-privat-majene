@@ -35,7 +35,7 @@ Route::prefix('pelajar')->middleware(['auth', 'pelajar'])->group(function () {
     // Pencarian dan Rekomendasi
     Route::get('/search', [PelajarController::class, 'searchForm'])->name('pelajar.search.form');
     // Proses pencarian dan menampilkan hasil
-    Route::post('/search/results', [PelajarController::class, 'search'])->name('pelajar.search.results');
+    Route::match(['get', 'post'], '/search/results', [PelajarController::class, 'search'])->name('pelajar.search.results');
 
     // Detail Pengajar (Pengajar Show)
     Route::get('/pengajar/{id}', [PelajarController::class, 'showPengajar'])->name('pelajar.pengajar.show');
