@@ -39,12 +39,12 @@ class KnnService
         // Definisi Bobot
         $weights = [
             'distance' => 0.5,
-            'subject' => 0.3,
-            'experience' => 0.2,
+            'subject' => 0.5,
+            // 'experience' => 0.2,
         ];
 
         // Normalisasi untuk Pengalaman: Batas maksimum yang dijadikan acuan 10 tahun
-        $MAX_EXPERIENCE = 10;
+        // $MAX_EXPERIENCE = 10;
 
         foreach ($pengajars as $p) {
             // 1. Perhitungan Jarak (menggunakan Euclidean)
@@ -71,7 +71,7 @@ class KnnService
             $distanceContribution = ($distanceScoreNorm * 100) * $weights['distance'];
 
 
-            // 3. Perhitungan Score Mata Pelajaran (30% Bobot)
+            // 3. Perhitungan Score Mata Pelajaran (50% Bobot)
             $subjectScore = 0; // Skor Mentah (0 atau 100)
             if ($subject && $p->mata_pelajaran) {
                 $mp = strtolower($p->mata_pelajaran);
@@ -83,13 +83,13 @@ class KnnService
             $subjectContribution = $subjectScore * $weights['subject'];
 
 
-            // 4. Perhitungan Score Pengalaman (20% Bobot)
-            // Skor Mentah (max 100): Pengalaman saat ini dibagi pengalaman maksimal acuan (10 tahun)
-            $experienceScore = min(100, ((int)$p->pengalaman_tahun / $MAX_EXPERIENCE) * 100);
-            $experienceContribution = $experienceScore * $weights['experience'];
 
-            // 5. Total Similarity Score (FSS)
-            $totalSimilarity = $distanceContribution + $subjectContribution + $experienceContribution;
+            // Skor Mentah (max 100): Pengalaman saat ini dibagi pengalaman maksimal acuan (10 tahun)
+            // $experienceScore = min(100, ((int)$p->pengalaman_tahun / $MAX_EXPERIENCE) * 100);
+            // $experienceContribution = $experienceScore * $weights['experience'];
+
+            // 4. Total Similarity Score (FSS)
+            $totalSimilarity = $distanceContribution + $subjectContribution;
 
             $results[] = [
                 'pengajar' => $p,
