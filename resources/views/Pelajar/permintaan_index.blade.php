@@ -43,7 +43,7 @@
                         <table class="table table-bordered table-striped" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th>No.</th>
                                     <th>Pengajar</th>
                                     <th>Jadwal Diinginkan</th>
                                     <th>Status</th>

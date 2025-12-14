@@ -16,12 +16,36 @@ class PengajarController extends Controller
     public function __construct()
     {
         // parent::__construct();
-        // $this->middleware('auth');
+        $this->middleware('auth');
     }
 
     /**
      * Show pengajar dashboard
      */
+    public function index()
+    {
+        // Mendapatkan data Pengajar yang sedang login
+        // Asumsi relasi one-to-one User -> Pengajar
+        $pengajar = Pengajar::where('user_id', Auth::id())->first();
+
+        // Jika tidak ditemukan (seharusnya tidak terjadi jika middleware berjalan benar)
+        if (!$pengajar) {
+            // Bisa redirect ke halaman setup profil atau error
+            return redirect('/')->with('error', 'Data pengajar tidak ditemukan.');
+        }
+
+        // Contoh data untuk ditampilkan di dashboard (bisa dikembangkan)
+        $data = [
+            'total_permintaan_pending' => $pengajar->permintaan()->where('status', 'pending')->count(),
+            'total_ulasan' => $pengajar->ulasan()->count(),
+            // ... tambahkan data lain yang relevan untuk dashboard pengajar
+        ];
+
+        // Memuat view dashboard pengajar
+        return view('Pengajar.dashboard', $data);
+    }
+
+
     public function dashboard()
     {
         $user = Auth::user();

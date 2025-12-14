@@ -32,6 +32,12 @@
                             <label class="form-label">Mata Pelajaran</label>
                             <input name="mata_pelajaran" class="form-control" placeholder="Contoh: Matematika">
                         </div>
+
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">Pengalaman  (Tahun)</label>
+                            <input name="pengalaman_tahun" class="form-control" placeholder="Contoh: 10">
+                        </div>
+
                         <div class="col-md-6 form-group">
                             <label class="form-label">Jarak Maksimal (Km)</label>
                             <input type="number" name="radius" class="form-control" value="10" min="1" max="100" placeholder="Contoh: 10">

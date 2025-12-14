@@ -238,19 +238,19 @@
                                         <p>Profil Saya</p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
+                                {{-- <li class="nav-item">
                                     <a href="{{ route('pengajar.permintaan') }}"
                                         class="nav-link {{ request()->routeIs('pengajar.permintaan') ? 'active' : '' }}">
                                         <i class="nav-icon fas fa-envelope"></i>
                                         <p>Permintaan</p>
-                                    </a>
+                                    </a> --}}
                                 </li>
-                                <li class="nav-item">
+                                {{-- <li class="nav-item">
                                     <a href="{{ route('pengajar.ulasan') }}"
                                         class="nav-link {{ request()->routeIs('pengajar.ulasan') ? 'active' : '' }}">
                                         <i class="nav-icon fas fa-star"></i>
                                         <p>Ulasan</p>
-                                    </a>
+                                    </a> --}}
                                 </li>
                             @elseif(Auth::user()->isPelajar())
                                 <li class="nav-header">PELAJAR MENU</li>
