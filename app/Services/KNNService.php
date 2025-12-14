@@ -8,7 +8,7 @@ class KnnService
 {
     /**
      * Menghitung Euclidean Distance antara dua koordinat Lat/Lon.
-     * Konsisten dengan rumus Euclidean Distance di laporan Anda.
+     * NILAI INI DIGUNAKAN UNTUK PERHITUNGAN FSS (Distance Metric).
      */
     protected static function euclideanDistance($lat1, $lon1, $lat2, $lon2) {
         if ($lat1 === null || $lon1 === null || $lat2 === null || $lon2 === null) {
@@ -16,16 +16,33 @@ class KnnService
         }
 
         // Euclidean Distance Formula: sqrt((x2 - x1)^2 + (y2 - y1)^2)
-        // Dosen: Kami menggunakan nilai Lat/Lon mentah sebagai sumbu X dan Y.
         $dLat = $lat2 - $lat1;
         $dLon = $lon2 - $lon1;
 
-        // Hasilnya adalah nilai relatif (bukan KM), tetapi mencerminkan kedekatan.
         return sqrt($dLat**2 + $dLon**2);
     }
 
     /**
-     * Mencari K pengajar terdekat menggunakan Logika Bobot KNN Sesuai Laporan.
+     * Menghitung jarak Haversine antara dua koordinat dalam Kilometer.
+     * NILAI INI DIGUNAKAN HANYA UNTUK TUJUAN DISPLAY (TAMPILAN JARAK FISIK).
+     */
+    protected static function calculateHaversine($lat1, $lon1, $lat2, $lon2) {
+        if ($lat1 === null || $lon1 === null || $lat2 === null || $lon2 === null) {
+             // Jika ada data koordinat null, kembalikan jarak yang besar
+             return INF;
+        }
+        $earthRadius = 6371.0; // Radius bumi dalam KM
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat/2)**2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon/2)**2;
+        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+
+        return $earthRadius * $c;
+    }
+
+    /**
+     * Mencari K pengajar terdekat menggunakan Logika Bobot KNN.
      */
     public static function recommend(array $criteria, int $k = 5): array
     {
@@ -36,65 +53,49 @@ class KnnService
         $pengajars = Pengajar::verified()->with('user')->get();
         $results = [];
 
-        // Definisi Bobot
+        // Definisi Bobot (Total 1.0)
         $weights = [
-            'distance' => 0.5,
-            'subject' => 0.5,
-            // 'experience' => 0.2,
+            'distance' => 0.7,
+            'subject' => 0.3,
         ];
 
-        // Normalisasi untuk Pengalaman: Batas maksimum yang dijadikan acuan 10 tahun
-        // $MAX_EXPERIENCE = 10;
-
         foreach ($pengajars as $p) {
-            // 1. Perhitungan Jarak (menggunakan Euclidean)
-            $distance = self::euclideanDistance($lat, $lon, $p->latitude, $p->longitude);
-            if ($distance === INF) continue;
 
-            // 2. Perhitungan Score Jarak (50% Bobot)
-            // Dosen: Untuk mengubah Jarak (minimum) menjadi Skor Kemiripan (maksimum),
-            // kami menggunakan fungsi inversi yang dinormalisasi: 1 / (1 + distance).
-            // Hasilnya kemudian dinormalisasi terhadap bobot.
+            // 1. Perhitungan Jarak Euclidean (Untuk FSS/KNN)
+            $distance_euc = self::euclideanDistance($lat, $lon, $p->latitude, $p->longitude);
+            if ($distance_euc === INF) continue; // Skip jika koordinat tidak valid
 
-            $distanceScoreNorm = 1 / (1 + $distance); // Jarak dinormalisasi antara 0 dan 1
+            // 1.5. Perhitungan Jarak Haversine (Untuk Display KM)
+            $distance_km = self::calculateHaversine($lat, $lon, $p->latitude, $p->longitude);
 
-            // Kami mengambil skor jarak tertinggi dari semua data pengajar yang ada untuk dinormalisasi
-            // Namun, untuk kesederhanaan dan keamanan (menghindari query ekstra),
-            // kita menggunakan normalisasi terbalik (1 / (1+d))
-
-            // *************************************************************************
-            // PENTING: Jika Anda ingin EuclideanScore selalu antara 0 dan 100,
-            // maka D-Norm perlu diimplementasikan di seluruh dataset.
-            // *************************************************************************
-
-            // Kontribusi Jarak: (D-Norm * 100) * Bobot
+            // 2. Kontribusi Jarak (70% Bobot)
+            // Mengubah Jarak Euclidean menjadi Skor Kemiripan D-Norm
+            $distanceScoreNorm = 1 / (1 + $distance_euc);
+            // Kontribusi dihitung: (D-Norm * 100) * Bobot
             $distanceContribution = ($distanceScoreNorm * 100) * $weights['distance'];
 
 
-            // 3. Perhitungan Score Mata Pelajaran (50% Bobot)
-            $subjectScore = 0; // Skor Mentah (0 atau 100)
+            // 3. Kontribusi Mata Pelajaran (30% Bobot)
+            $subjectScore = 0;
             if ($subject && $p->mata_pelajaran) {
                 $mp = strtolower($p->mata_pelajaran);
-                // Cek kecocokan parsial (misalnya, 'mat' cocok dengan 'Matematika, Fisika')
+                // Logika kecocokan string
                 if (Str::contains($mp, $subject) || Str::contains($subject, $mp)) {
-                    $subjectScore = 100; // Match Penuh
+                    $subjectScore = 100; // Match Penuh (Skor Mentah)
                 }
             }
             $subjectContribution = $subjectScore * $weights['subject'];
 
 
-
-            // Skor Mentah (max 100): Pengalaman saat ini dibagi pengalaman maksimal acuan (10 tahun)
-            // $experienceScore = min(100, ((int)$p->pengalaman_tahun / $MAX_EXPERIENCE) * 100);
-            // $experienceContribution = $experienceScore * $weights['experience'];
-
-            // 4. Total Similarity Score (FSS)
+            // 4. Total Similarity Score (FSS - Max 100)
             $totalSimilarity = $distanceContribution + $subjectContribution;
 
             $results[] = [
                 'pengajar' => $p,
-                'distance' => round($distance, 6), // Euclidean Distance (6 desimal karena berupa derajat)
-                'score' => round($totalSimilarity, 2), // Skor Kemiripan Akhir
+                // Tambahkan kedua jarak
+                'distance_euc' => round($distance_euc, 6),
+                'distance_km' => round($distance_km, 2), // Gunakan ini untuk tampilan KM
+                'score' => round($totalSimilarity, 2),
             ];
         }
 
@@ -104,7 +105,4 @@ class KnnService
         // Ambil Top-K
         return array_slice($results, 0, $k);
     }
-
-    // Catatan: Jika Anda ingin mempertahankan Haversine (untuk akurasi jarak),
-    // ubah nama method di atas kembali menjadi haversine, dan pastikan laporan disesuaikan.
 }

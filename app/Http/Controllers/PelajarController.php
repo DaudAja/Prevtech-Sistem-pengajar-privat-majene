@@ -105,7 +105,7 @@ class PelajarController extends \App\Http\Controllers\Controller
                 'user_id' => Auth::id(),
                 'pengajar_id' => $r['pengajar']->id,
                 'nilai_kemiripan' => $r['score'],
-                'jarak_km' => $r['distance'],
+                'jarak_km' => $r['distance_km'],
                 'tanggal_rekomendasi' => now(),
             ]);
         }
